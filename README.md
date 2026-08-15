@@ -49,10 +49,10 @@
 
 ## 安装 / Installation
 
-1. 点击**[发布版本](https://github.com/BingHu0/FastNaming_addon/releases)**下载'FastNaming_addon.zip'。
+1. 点击**[发布版本](https://github.com/BingHu0/FastNaming_addon/releases)**下载`FastNaming_addon.zip`。
 2. Blender → **编辑 (Edit) → 偏好设置 (Preferences) → 插件 (Add-ons) → 安装 (Install…)**。
-3. 选择'FastNaming_addon.zip'，安装后勾选启用 **Fast Naming**。
-4. 侧边栏（快捷键`N`）出现 “Fast Naming / 快速命名” 标签页即成功。
+3. 选择`FastNaming_addon.zip`，安装后勾选启用 **Fast Naming**。
+4. 侧边栏（按`N`）出现 “Fast Naming / 快速命名” 标签页即成功。
 
 ---
 
