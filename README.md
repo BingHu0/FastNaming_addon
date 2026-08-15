@@ -1,4 +1,4 @@
-# Fast Naming（FastNaming_addon）
+# Fast Naming
 
 > 一个用于 Blender 的**自动命名插件**，帮助你在 3D 视图侧边栏里**快速、批量地命名对象与骨骼**。
 > A Blender add-on for quickly and consistently naming objects and armature bones.
@@ -49,21 +49,10 @@
 
 ## 安装 / Installation
 
-> 仓库根目录的 `blender_manifest.toml` 仍是模板（`id = "haloWorld_addon"`），若要用**扩展**方式安装需先把 `id` 改成 `FastNaming_addon`。下面**方式 A** 最稳妥。
-
-### 方式 A：传统插件（推荐）
-
 1. 把本仓库的 **`FastNaming_addon`** 文件夹（包含 `__init__.py` 的那个）打成 zip，或直接保留文件夹。
 2. Blender → **编辑 (Edit) → 偏好设置 (Preferences) → 插件 (Add-ons) → 安装 (Install…)**。
 3. 选择该文件夹（或 zip），安装后勾选启用 **Fast Naming**。
 4. 侧边栏（`N`）出现 “Fast Naming / 快速命名” 标签页即成功。
-
-### 方式 B：扩展（Extension，Blender 4.2+）
-
-1. 编辑根目录与 `addons/FastNaming_addon/` 下的 `blender_manifest.toml`，将 `id` 改为 `FastNaming_addon`，并按需填写 `version` / `maintainer` / `website`。
-2. `Edit → Preferences → Get Extensions → Install from Disk…` 安装该目录。
-
-> 注：项目同时兼容传统插件与扩展两种加载方式（`config.is_extension()` 自动判断），但扩展清单字段尚未填完，故方式 A 更省心。
 
 ---
 
