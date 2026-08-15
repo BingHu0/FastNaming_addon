@@ -4,7 +4,7 @@
 > A Blender add-on for quickly and consistently naming objects and armature bones.
 
 - 中文界面 / English UI（内置简体中文翻译，随 Blender 语言自动切换）
-- 适用版本：Blender **4.2 及以上**（扩展清单 `blender_version_min = 4.2.0`）；传统插件模式按 `bl_info` 声明（见“已知问题”）
+- 开发版本：Blender **5.2.0**（未进行最低版本测试）
 - 许可证：GPL-3.0-or-later
 
 ---
