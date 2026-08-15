@@ -154,20 +154,15 @@ FastNaming_addon/
 
 ---
 
-## 已知问题 / 待办 / Known Issues
-
-- `bl_info` 中 `blender` 版本声明为 `(5, 2, 0)`，而扩展清单为 `4.2.0`，建议统一（影响传统插件在低版本的可见性提示）。
-- 扩展清单 `id` 仍是模板值 `haloWorld_addon`，扩展模式安装前需改为 `FastNaming_addon`。
-- “创建对象时自动命名”基于依赖图事件检测，部分情形（如复制对象）可能行为异常，属实验性。
-- 临时名称片段（`{name}` 覆盖值）仅本次会话有效，重启后失效。
-- 作者备注：**此插件未进行过系统测试，可能存在一些未知问题。**
+## 备注 / Remarks
+此插件未进行过系统测试，可能存在一些未知问题。
 
 ---
 
 ## 许可证 / License
 
-GPL-3.0-or-later。详见 `blender_manifest.toml` 中的 `license` 字段。
+GPL-3.0-or-later。
 
 ## 联系 / Contact
 
-反馈与建议见插件 `bl_info` 中的 `tracker_url`（邮箱）。欢迎在仓库提交 Issue。
+如有反馈与建议欢迎投递到邮箱：3317877311@qq.com。也欢迎在仓库提交 Issue。
