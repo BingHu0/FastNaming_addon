@@ -266,21 +266,49 @@ class InsertVariableOperator(bpy.types.Operator):
         default=""
     )
 
+    # 字面量插入模式：若非空则直接追加字面字符（不加花括号），用于间隔符等
+    literal: bpy.props.StringProperty(
+        name=i18n("Literal Insertion"),
+        description=i18n("Insert literal character directly (no braces)"),
+        default=""
+    )
+
     def execute(self, context: bpy.types.Context):
         scene = context.scene
-        var_placeholder = "{" + self.variable_name + "}"
-        current = scene.temp_naming_template
-        scene.temp_naming_template = current + var_placeholder
 
-        # 如果插入的是 {name}，同步调整 temp_name_snippets 集合大小
-        if self.variable_name == 'name':
-            name_count = scene.temp_naming_template.count("{name}")
-            while len(scene.temp_name_snippets) < name_count:
-                scene.temp_name_snippets.add()
-            while len(scene.temp_name_snippets) > name_count:
-                scene.temp_name_snippets.remove(len(scene.temp_name_snippets) - 1)
+        # —— 判定本次调用的真实意图：
+        #    Blender 会在多次点击间缓存 Operator 属性（状态污染），
+        #    因此不能只用 if self.literal 作为分支条件。
+        #    规则：
+        #      · 显式设置了 variable_name（非空）→ 无论 literal 是否残留，一律按片段处理
+        #      · 仅设置了 literal 且 variable_name 为空 → 按字面量处理
+        # ——
+        if self.variable_name:
+            var_placeholder = "{" + self.variable_name + "}"
+            current = scene.temp_naming_template
+            scene.temp_naming_template = current + var_placeholder
 
-        return {'FINISHED'}
+            # 如果插入的是 {name}，同步调整 temp_name_snippets 集合大小
+            if self.variable_name == 'name':
+                name_count = scene.temp_naming_template.count("{name}")
+                while len(scene.temp_name_snippets) < name_count:
+                    scene.temp_name_snippets.add()
+                while len(scene.temp_name_snippets) > name_count:
+                    scene.temp_name_snippets.remove(len(scene.temp_name_snippets) - 1)
+
+            # 清除上一次残留的 literal 值，防止下次调用误入字面量分支
+            self.literal = ""
+            return {'FINISHED'}
+
+        # 字面量分支：只在 variable_name 为空且 literal 非空时生效
+        if self.literal:
+            scene.temp_naming_template = scene.temp_naming_template + self.literal
+            # 清除本次 literal 值，防止下次调用复用
+            self.literal = ""
+            return {'FINISHED'}
+
+        self.report({'WARNING'}, i18n("Snippet name cannot be empty"))
+        return {'CANCELLED'}
 
 
 class ClearTemplateOperator(bpy.types.Operator):

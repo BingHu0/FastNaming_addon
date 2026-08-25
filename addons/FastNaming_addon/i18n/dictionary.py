@@ -40,6 +40,15 @@ dictionary = {
         ("*", "{date} - Date"): "日期{date}",
         ("*", "{time} - Time"): "时间{time}",
 
+        # 间隔符（三级菜单台头与按钮）
+        ("*", "Separator:"): "间隔符:",
+        ("*", "Underscore _"): "下划线 _",
+        ("*", "Hyphen -"): "连字符 -",
+        ("*", "Space"): "空格",
+        ("*", "Insert Separator between name snippets"): "在名称片段之间插入分隔符",
+        ("*", "Literal Insertion"): "字面量插入",
+        ("*", "Insert literal character directly (no braces)"): "直接插入字面字符（不加花括号）",
+
         # 内置名称片段单独说明
         ("*", "num_desc"): "自动递增序号，如 001、002，受起始序号与位数控制",
         ("*", "type_desc"): "对象类型，如 Mesh=网格、Light=灯光、Camera=摄像机",
@@ -109,11 +118,13 @@ dictionary = {
         ("Operator", "Add Convention"): "添加命名规范",
         ("Operator", "Remove Convention"): "删除命名规范",
         ("Operator", "Import Convention"): "导入命名规范",
+        ("Operator", "Export Convention"): "导出命名规范",
         ("Operator", "One-Click Bone Naming"): "骨骼一键命名",
         ("Operator", "Manual Bone Mapping"): "手动骨骼映射",
         # 算子悬停说明（bl_description）
         ("Operator", "Rename all selected objects using current template"): "使用当前模板重命名所有选中对象",
         ("Operator", "Auto-name bones in selected armature by chosen convention"): "按所选规范自动命名选中骨架中的所有骨骼",
+        ("Operator", "Export bone naming conventions to a JSON file"): "将骨骼命名规范导出为JSON文件",
 
         # 属性字段标签
         ("*", "Bone Name"): "骨骼名称",
@@ -151,6 +162,21 @@ dictionary = {
         ("*", "Active Bone Index"): "激活骨骼索引",
         ("*", "Bone Conventions"): "骨骼命名规范",
         ("*", "Active Convention"): "当前规范",
+        # EnumProperty 相关（规范选择下拉框）
+        ("*", "Currently selected naming convention"): "当前选中的命名规范",
+        ("*", "(No conventions)"): "（无可用规范）",
+        # 导出规范相关
+        ("*", "Export Convention"): "导出规范",
+        ("*", "Export bone naming conventions to a JSON file"): "将骨骼命名规范导出为JSON文件",
+        ("*", "Select Conventions"): "选择规范",
+        ("*", "Tick conventions to export"): "勾选要导出的规范",
+        ("*", "No conventions to export"): "没有可导出的规范",
+        ("*", "No conventions selected for export"): "未选择任何要导出的规范",
+        ("*", "Convention exported successfully"): "规范导出成功",
+        ("*", "No file path specified"): "未指定文件路径",
+        ("*", "No conventions available"): "暂无可用规范",
+        ("*", "Select All"): "全选",
+        ("*", "Clear"): "清空",
         ("*", "Add Bone"): "添加骨骼",
         ("*", "Current Name"): "当前名称",
         ("*", "New Name"): "新名称",

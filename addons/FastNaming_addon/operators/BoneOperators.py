@@ -508,11 +508,12 @@ class BONE_OT_add_preset(Operator):
         ensure_default_conventions(addon_prefs)
 
         # 索引越界保护
-        if not (0 <= addon_prefs.active_bone_convention_index < len(addon_prefs.bone_conventions)):
+        idx = addon_prefs._active_index()
+        if not (0 <= idx < len(addon_prefs.bone_conventions)):
             self.report({'WARNING'}, i18n("No active convention"))
             return {'CANCELLED'}
 
-        conv = addon_prefs.bone_conventions[addon_prefs.active_bone_convention_index]
+        conv = addon_prefs.bone_conventions[idx]
         new_item = conv.bones.add()
         new_item.name = self.new_name
         new_item.category = self.new_category
@@ -536,11 +537,12 @@ class BONE_OT_remove_preset(Operator):
         addon_prefs = context.preferences.addons[__addon_name__].preferences
         assert isinstance(addon_prefs, AutoNamingPreferences)
 
-        if not (0 <= addon_prefs.active_bone_convention_index < len(addon_prefs.bone_conventions)):
+        idx = addon_prefs._active_index()
+        if not (0 <= idx < len(addon_prefs.bone_conventions)):
             self.report({'WARNING'}, i18n("No active convention"))
             return {'CANCELLED'}
 
-        conv = addon_prefs.bone_conventions[addon_prefs.active_bone_convention_index]
+        conv = addon_prefs.bone_conventions[idx]
         if 0 <= self.index < len(conv.bones):
             conv.bones.remove(self.index)
             return {'FINISHED'}
@@ -576,7 +578,7 @@ class BONE_OT_add_convention(Operator):
         new_conv.convention_name = self.convention_name
 
         # 切换激活规范到新建项
-        addon_prefs.active_bone_convention_index = len(addon_prefs.bone_conventions) - 1
+        addon_prefs.active_bone_convention_index = str(len(addon_prefs.bone_conventions) - 1)
 
         self.report({'INFO'}, i18n(f"Added convention: {self.convention_name}"))
         return {'FINISHED'}
@@ -598,8 +600,9 @@ class BONE_OT_remove_convention(Operator):
         if 0 <= self.index < len(addon_prefs.bone_conventions):
             addon_prefs.bone_conventions.remove(self.index)
             # 修正激活索引
-            if addon_prefs.active_bone_convention_index >= len(addon_prefs.bone_conventions):
-                addon_prefs.active_bone_convention_index = max(0, len(addon_prefs.bone_conventions) - 1)
+            current_idx = addon_prefs._active_index()
+            if current_idx >= len(addon_prefs.bone_conventions):
+                addon_prefs.active_bone_convention_index = str(max(0, len(addon_prefs.bone_conventions) - 1))
             return {'FINISHED'}
         self.report({'WARNING'}, i18n("Invalid index"))
         return {'CANCELLED'}
@@ -665,10 +668,181 @@ class BONE_OT_import_convention(Operator):
             bone_item.side = side
 
         # 切换激活规范到导入项
-        addon_prefs.active_bone_convention_index = len(addon_prefs.bone_conventions) - 1
+        addon_prefs.active_bone_convention_index = str(len(addon_prefs.bone_conventions) - 1)
 
         self.report({'INFO'}, i18n(f"Imported convention: {new_conv.convention_name} ({len(new_conv.bones)} bones)"))
         return {'FINISHED'}
+
+
+class BONE_OT_export_toggle(Operator):
+    """切换导出对话框中单个规范的勾选状态"""
+    bl_idname = "armature._export_toggle"
+    bl_label = i18n("Toggle Export Convention")
+    bl_options = {'INTERNAL'}
+
+    index: IntProperty(default=0)
+
+    def execute(self, context):
+        mask = context.scene.temp_export_mask
+        bit = 1 << self.index
+        if mask & bit:
+            mask &= ~bit
+        else:
+            mask |= bit
+        context.scene.temp_export_mask = mask
+        return {'FINISHED'}
+
+
+class BONE_OT_export_select_all(Operator):
+    """导出对话框：全选所有规范"""
+    bl_idname = "armature._export_select_all"
+    bl_label = i18n("Select All for Export")
+    bl_options = {'INTERNAL'}
+
+    def execute(self, context):
+        prefs = context.preferences.addons[__addon_name__].preferences
+        mask = 0
+        for i in range(len(prefs.bone_conventions)):
+            mask |= (1 << i)
+        context.scene.temp_export_mask = mask
+        return {'FINISHED'}
+
+
+class BONE_OT_export_clear_all(Operator):
+    """导出对话框：清空所有勾选"""
+    bl_idname = "armature._export_clear_all"
+    bl_label = i18n("Clear Export Selection")
+    bl_options = {'INTERNAL'}
+
+    def execute(self, context):
+        context.scene.temp_export_mask = 0
+        return {'FINISHED'}
+
+
+class BONE_OT_export_convention(Operator):
+    """将骨骼命名规范导出为 JSON 文件（格式与导入兼容）"""
+    bl_idname = "armature.export_convention"
+    bl_label = i18n("Export Convention")
+    bl_description = i18n("Export bone naming conventions to a JSON file")
+    bl_options = {'REGISTER', 'UNDO'}
+
+    # 文件浏览器选择的路径
+    filepath: StringProperty(subtype='FILE_PATH')
+    # 文件过滤器
+    filter_glob: StringProperty(default="*.json", options={'HIDDEN'})
+
+    def invoke(self, context, event):
+        # 重置选择状态并打开自定义对话框
+        context.scene.temp_export_mask = 0
+        return context.window_manager.invoke_props_dialog(self, width=450)
+
+    def draw(self, context):
+        """自定义对话框：竖向复选框列表 + 全选/清空按钮"""
+        layout = self.layout
+        scene = context.scene
+        prefs = context.preferences.addons[__addon_name__].preferences
+
+        layout.label(text=i18n("Select conventions to export:"))
+        layout.separator()
+
+        if len(prefs.bone_conventions) == 0:
+            layout.label(text=i18n("No conventions available"), icon='ERROR')
+            return
+
+        # 竖向复选框列表（每个规范一行）
+        for i, conv in enumerate(prefs.bone_conventions):
+            row = layout.row()
+            is_checked = bool(scene.temp_export_mask & (1 << i))
+
+            # 勾选切换按钮
+            op = row.operator(
+                BONE_OT_export_toggle.bl_idname,
+                text="",
+                depress=is_checked,
+                icon='CHECKBOX_HLT' if is_checked else 'CHECKBOX_DEHLT'
+            )
+            op.index = i
+
+            # 规范名称 + 骨骼数量
+            row.label(text=f"{conv.convention_name}  ({len(conv.bones)} {i18n('bones')})")
+
+        # 全选 / 清空 按钮
+        layout.separator()
+        row = layout.row(align=True)
+        row.operator(
+            BONE_OT_export_select_all.bl_idname,
+            text=i18n("Select All"),
+            icon='CHECKBOX_HLT'
+        )
+        row.operator(
+            BONE_OT_export_clear_all.bl_idname,
+            text=i18n("Clear"),
+            icon='CHECKBOX_DEHLT'
+        )
+
+    def execute(self, context):
+        """
+        两次调用模式：
+        1. props_dialog 的 OK 按钮 → 读取 temp_export_mask → 打开文件浏览器
+        2. 文件浏览器的 Save 按钮 → 写入 JSON 文件
+        """
+        scene = context.scene
+        prefs = context.preferences.addons[__addon_name__].preferences
+
+        if not self.filepath:
+            # 第一次调用：从 props_dialog OK
+            mask = scene.temp_export_mask
+            if mask == 0:
+                self.report({'WARNING'}, i18n("No conventions selected for export"))
+                return {'CANCELLED'}
+            # 打开文件浏览器
+            context.window_manager.fileselect_add(self)
+            return {'RUNNING_MODAL'}
+        else:
+            # 第二次调用：从文件浏览器 Save
+            mask = scene.temp_export_mask
+            selected_indices = []
+            for i in range(len(prefs.bone_conventions)):
+                if mask & (1 << i):
+                    selected_indices.append(i)
+
+            if not selected_indices:
+                self.report({'WARNING'}, i18n("No conventions selected for export"))
+                return {'CANCELLED'}
+
+            convs_to_export = [prefs.bone_conventions[i] for i in selected_indices]
+
+            # 序列化
+            def _serialize(conv):
+                return {
+                    "name": conv.convention_name,
+                    "bones": [
+                        {"name": b.name, "category": b.category, "side": b.side}
+                        for b in conv.bones
+                    ]
+                }
+
+            if len(convs_to_export) == 1:
+                json_data = _serialize(convs_to_export[0])
+            else:
+                json_data = [_serialize(c) for c in convs_to_export]
+
+            # 写入 JSON 文件
+            try:
+                with open(self.filepath, 'w', encoding='utf-8') as f:
+                    json.dump(json_data, f, indent=2, ensure_ascii=False)
+            except Exception as e:
+                self.report({'ERROR'}, f"Failed to write file: {e}")
+                return {'CANCELLED'}
+
+            # 报告成功
+            if len(convs_to_export) == 1:
+                self.report({'INFO'}, i18n("Convention exported successfully") + f": {convs_to_export[0].convention_name}")
+            else:
+                names = ", ".join(c.convention_name for c in convs_to_export)
+                self.report({'INFO'}, i18n("Convention exported successfully") + f": [{names}]")
+
+            return {'FINISHED'}
 
 
 class BONE_OT_auto_name_skeleton(Operator):

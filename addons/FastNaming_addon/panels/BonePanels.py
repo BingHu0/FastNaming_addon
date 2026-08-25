@@ -144,11 +144,14 @@ class BoneNamingPanel(BasePanel, bpy.types.Panel):
             layout.label(text=i18n("No conventions; please add one in preferences"), icon='ERROR')
         else:
             # 修正越界索引
-            if not (0 <= addon_prefs.active_bone_convention_index < len(addon_prefs.bone_conventions)):
-                addon_prefs.active_bone_convention_index = 0
+            idx = addon_prefs._active_index()
+            if idx < 0 or idx >= len(addon_prefs.bone_conventions):
+                addon_prefs.active_bone_convention_index = "0"
+                idx = 0
+            # 渲染为下拉框（EnumProperty 自动显示规范名称）
             layout.prop(addon_prefs, "active_bone_convention_index", text=i18n("Convention"))
 
-            current_conv = addon_prefs.bone_conventions[addon_prefs.active_bone_convention_index]
+            current_conv = addon_prefs.bone_conventions[idx]
 
             # 按部位分组渲染预制按钮
             groups = _group_bones_by_category(current_conv.bones)

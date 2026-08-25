@@ -4,8 +4,9 @@
 > A Blender add-on for quickly and consistently naming objects and armature bones.
 
 - 中文界面 / English UI（内置简体中文翻译，随 Blender 语言自动切换）
-- 开发版本：Blender **5.2.0**（未进行最低版本测试）
-- 许可证：GPL-3.0-or-later
+- 插件版本 / Add-on Version：**0.0.3**
+- 支持 Blender：**5.2.0+**（最低支持 5.2.0，未进行更低版本测试）
+- 许可证 / License：GPL-3.0-or-later
 
 ---
 
@@ -24,7 +25,7 @@
 - **序号控制**：可设置起始序号（Start Number）与位数（Number Padding，`0`=不补零，`3`=`001`）。
 - **批量重命名（Batch Rename）**：用当前模板重命名所有选中对象；序号自动从“已有对象中未占用的最小数字”开始。
 - **设为默认（Apply as Default）**：把当前面板里的模板/序号设置保存为偏好设置默认值。
-- **创建时自动命名**：在偏好设置中开启后，新创建的对象会按默认模板自动命名（实验性，见“已知问题”）。
+- **创建时自动命名**：在偏好设置中开启后，新创建的对象会按默认模板自动命名（实验性，详见下方“备注”）。
 
 ### 2. 骨骼命名（Bone Naming）
 
@@ -53,6 +54,8 @@
 2. Blender → **编辑 (Edit) → 偏好设置 (Preferences) → 插件 (Add-ons) → 安装 (Install…)**。
 3. 选择`FastNaming_addon.zip`，安装后勾选启用 **Fast Naming**。
 4. 侧边栏（按`N`）出现 “Fast Naming / 快速命名” 标签页即成功。
+
+> **扩展方式（Blender 5.2+）**：也可通过 **Edit → Preferences → Extensions → Install from Disk** 选择本仓库根目录（含 `blender_manifest.toml`）安装。扩展清单 `id` 已正确设为 `FastNaming_addon`。
 
 ---
 
@@ -121,7 +124,7 @@
 ```
 FastNaming_addon/
 ├── __init__.py                 # 入口，注册/注销插件（传统插件模式）
-├── blender_manifest.toml       # 扩展清单（模板，id 待改）
+├── blender_manifest.toml       # 扩展清单（id = FastNaming_addon，Blender 扩展方式安装用）
 ├── addons/
 │   ├── __init__.py
 │   └── FastNaming_addon/       # 插件主体

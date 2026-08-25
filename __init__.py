@@ -4,7 +4,7 @@ bl_info = {
     "name": 'Fast Naming',
     "author": 'BING',
     "blender": (5, 2, 0),
-    "version": (0, 0, 2),
+    "version": (0, 0, 3),
     "description": '这个是一个自动命名插件，用于快速命名对象和骨骼。',
     "warning": '此插件未进行过系统测试，可能存在一些未知问题。',
     "doc_url": '[documentation url]',

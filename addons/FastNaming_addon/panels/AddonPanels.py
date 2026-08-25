@@ -38,6 +38,13 @@ BUILTIN_VARIABLES = [
     ("time", "{time} - Time",          "time_desc"),
 ]
 
+# 间隔符列表（按钮显示文本i18n key, 实际插入的字面量字符）
+SEPARATORS = [
+    ("Underscore _", "_"),
+    ("Hyphen -",     "-"),
+    ("Space",        " "),
+]
+
 
 class BasePanel(object):
     """
@@ -104,11 +111,13 @@ class AutoNamingPanel(BasePanel, bpy.types.Panel):
         layout.separator()
 
         # ================================================================
-        # 内置名称片段（两列布局：按钮 + 说明）
+        # 二级菜单：内置名称片段（外层盒子 + 台头）
         # ================================================================
-        layout.label(text=i18n("Built-in Name Snippets:"))
+        builtin_box = layout.box()
+        builtin_box.label(text=i18n("Built-in Name Snippets:"))
+
         for var_key, var_label_key, var_desc_key in BUILTIN_VARIABLES:
-            row = layout.row(align=True)
+            row = builtin_box.row(align=True)
             split = row.split(factor=0.4)
             # 左列：按钮
             col_left = split.column(align=True)
@@ -121,6 +130,21 @@ class AutoNamingPanel(BasePanel, bpy.types.Panel):
             # 右列：单独说明
             col_right = split.column(align=True)
             col_right.label(text=i18n(var_desc_key))
+
+        # ================================================================
+        # 三级菜单：间隔符（在内置名称片段盒子里再嵌一个小盒子 + 台头）
+        # ================================================================
+        sep_box = builtin_box.box()
+        sep_box.label(text=i18n("Separator:"))
+        sep_row = sep_box.row(align=True)
+        for label_key, literal in SEPARATORS:
+            op = sep_row.operator(
+                InsertVariableOperator.bl_idname,
+                text=i18n(label_key),
+                icon='TRACKING'
+            )
+            op.variable_name = ""
+            op.literal = literal
 
         # ================================================================
         # {name} 临时片段输入框：模板中每个 {name} 对应一个输入框

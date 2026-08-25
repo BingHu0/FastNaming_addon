@@ -22,7 +22,7 @@ bl_info = {
     "name": "Fast Naming",
     "author": "BING",
     "blender": (5, 2, 0),
-    "version": (0, 0, 2),
+    "version": (0, 0, 3),
     "description": "这个是一个自动命名插件，用于快速命名对象和骨骼。",
     "warning": "此插件未进行过系统测试，可能存在一些未知问题。",
     "doc_url": "[documentation url]",
@@ -69,6 +69,8 @@ _addon_properties = {
         "bone_expand_Foot":  bpy.props.BoolProperty(default=False),
         # 模式2 未匹配骨骼的临时映射列表（用于手动映射对话框传递数据）
         "bone_manual_map_items": bpy.props.CollectionProperty(type=ManualMapItem),
+        # 导出规范对话框的临时选中状态（位掩码，跨两次 execute 调用持久化）
+        "temp_export_mask": bpy.props.IntProperty(default=0),
     },
 }
 

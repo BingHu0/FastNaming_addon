@@ -16,7 +16,7 @@ Blender 偏好设置开发核心概念：
 - draw方法: 定义偏好设置面板的UI布局
 """
 
-# 导入Blender Python API
+# 导入 Blender Python API
 import bpy
 # 导入属性类型定义
 from bpy.props import StringProperty, IntProperty, BoolProperty, EnumProperty, CollectionProperty
@@ -27,6 +27,20 @@ from bpy.types import AddonPreferences, PropertyGroup
 from ..config import __addon_name__
 # 导入国际化翻译函数
 from ....common.i18n.i18n import i18n
+
+
+def _get_convention_enum_items(self, context):
+    """
+    模块级回调函数：为 active_bone_convention_index EnumProperty 动态生成选项。
+    Blender EnumProperty 的 items 参数接受 (self, context) -> list 形式的可调用对象。
+    此处 self 即 AutoNamingPreferences 实例，可直接访问 self.bone_conventions。
+    """
+    items = []
+    for i, conv in enumerate(self.bone_conventions):
+        items.append((str(i), conv.convention_name, f"使用 {conv.convention_name} 规范"))
+    if not items:
+        items.append(("-1", i18n("(No conventions)"), i18n("请先在偏好设置中添加规范")))
+    return items
 
 
 class CustomVariableItem(PropertyGroup):
@@ -261,12 +275,23 @@ class AutoNamingPreferences(AddonPreferences):
     )
 
     # 当前激活的命名规范索引（面板下拉选择）
-    active_bone_convention_index: IntProperty(
+    # 使用 EnumProperty 以显示规范名称而非数字编号
+    active_bone_convention_index: EnumProperty(
         name=i18n("Active Convention"),
-        description=i18n("Index of the currently selected convention in bone naming panel"),
-        default=0,
-        min=0
+        description=i18n("Currently selected naming convention"),
+        items=_get_convention_enum_items,
+        default=None
     )
+
+    def _active_index(self) -> int:
+        """便捷方法：返回当前激活规范的整数索引"""
+        try:
+            val = self.active_bone_convention_index
+            if val is None:
+                return 0
+            return int(val)
+        except (ValueError, TypeError):
+            return 0
 
     def draw(self, context: bpy.types.Context):
         """
@@ -331,7 +356,7 @@ class AutoNamingPreferences(AddonPreferences):
             row.operator("armature.remove_convention", text="", icon='X').index = i
 
             # 仅对当前激活规范显示其骨骼列表
-            if i == self.active_bone_convention_index:
+            if str(i) == self.active_bone_convention_index:
                 # 遍历规范内所有骨骼项
                 for j, bone in enumerate(conv.bones):
                     bone_row = box.row()
@@ -344,7 +369,8 @@ class AutoNamingPreferences(AddonPreferences):
                 # 添加骨骼项按钮
                 box.operator("armature.add_bone_preset", text=i18n("Add Bone"), icon='ADD')
 
-        # 添加规范 + 导入 JSON 按钮放同一行
+        # 添加规范 + 导入 JSON + 导出 JSON 按钮放同一行
         row = layout.row(align=True)
         row.operator("armature.add_convention", text=i18n("Add Convention"), icon='ADD')
         row.operator("armature.import_convention", text=i18n("Import Convention"), icon='IMPORT')
+        row.operator("armature.export_convention", text=i18n("Export Convention"), icon='EXPORT')
